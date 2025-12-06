@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Atrapa al Elfo</title>
+
+  <link rel="stylesheet" href="estilo.css">
+  <link rel="manifest" href="manifiesto.json">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Atrapa al Elfo 🎄</h1>
+      <div class="hud">
+        <div>Puntos: <span id="score">0</span></div>
+        <div>Tiempo: <span id="time">30</span>s</div>
+      </div>
+    </header>
+
+    <main id="game">
+      <div id="board"></div>
+    </main>
+
+    <footer>
+      <button id="start">Empezar</button>
+      <button id="share">Compartir</button>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('servicio-worker.js').catch(()=>{});
+    }
+  </script>
+</body>
+</html>
