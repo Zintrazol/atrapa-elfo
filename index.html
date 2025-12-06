@@ -2,14 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Atrapa al Elfo</title>
-
+    
     <!-- Estilos -->
-    <link rel="stylesheet" href="estilo.css" />
+    <link rel="stylesheet" href="estilo.css">
 
     <!-- PWA Manifest -->
-    <link rel="manifest" href="manifiesto.json" />
+    <link rel="manifest" href="manifiesto.json">
 </head>
 <body>
     <div class="container">
@@ -31,14 +31,6 @@
         </footer>
     </div>
 
-    <!-- Lógica del juego -->
     <script src="app.js"></script>
-
-    <!-- Service Worker -->
-    <script>
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("servicio-worker.js").catch(() => {});
-        }
-    </script>
 </body>
 </html>
