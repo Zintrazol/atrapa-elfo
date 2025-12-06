@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dado de colores</title>
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --txt:#f7fafc;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(180deg,#071026,#07111a 60%);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:var(--txt);
+    padding:20px;
+  }
+  .wrap{
+    width:100%;
+    max-width:420px;
+    text-align:center;
+  }
+  h1{margin:6px 0 14px;font-size:20px}
+  .dice {
+    width:200px;height:200px;margin:12px auto;border-radius:18px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 30px rgba(2,6,23,0.6), inset 0 -6px 20px rgba(255,255,255,0.03);
+    transition:transform 700ms cubic-bezier(.2,.9,.3,1), box-shadow .3s;
+    user-select:none;
+    -webkit-user-select:none;
+    cursor:pointer;
+  }
+  .dice:active{ transform:scale(.98) }
+  .label{
+    margin-top:14px;font-weight:700;font-size:18px;letter-spacing:.6px;
+  }
+  .controls{display:flex;gap:10px;justify-content:center;margin-top:14px}
+  button{
+    padding:10px 14px;border-radius:12px;border:0;background:rgba(255,255,255,0.06);
+    color:var(--txt);font-weight:700;backdrop-filter: blur(4px);cursor:pointer;
+  }
+  .small{font-size:13px;padding:8px 12px}
+  /* Colors */
+  .c-amarillo{ background: linear-gradient(180deg,#ffea6a,#f6d22d); color:#3b2b00;}
+  .c-rojo{ background: linear-gradient(180deg,#ff7b7b,#e63c3c); color:#3b0000;}
+  .c-verde{ background: linear-gradient(180deg,#8ff7a0,#39c46d); color:#023b09;}
+  .c-morado{ background: linear-gradient(180deg,#bda0ff,#7f5cff); color:#14003b;}
+  /* rotating animation */
+  @keyframes roll {
+    0%{ transform: rotate(0deg) scale(1); }
+    70%{ transform: rotate(720deg) scale(1.05); }
+    100%{ transform: rotate(760deg) scale(1); }
+  }
+  /* accessibility: visible focus */
+  button:focus, .dice:focus { outline: 3px solid rgba(255,255,255,0.08); outline-offset:4px }
+  .note{margin-top:10px;font-size:13px;opacity:.8}
+</style>
+</head>
+<body>
+  <div class="wrap" role="application" aria-label="Dado de colores">
+    <h1>Dado de colores</h1>
+
+    <div id="dice" class="dice c-amarillo" role="button" tabindex="0" aria-pressed="false" aria-label="Dado. Toca para lanzar">
+      <div id="emoji" style="font-size:64px;user-select:none;">🎲</div>
+    </div>
+
+    <div class="label" id="result">Toca el dado para lanzar</div>
+
+    <div class="controls">
+      <button id="rollBtn">Lanzar</button>
+      <button id="soundBtn" class="small">🔊 Sonido: On</button>
+      <button id="resetBtn" class="small">Restablecer</button>
+    </div>
+
+    <div class="note">También puedes pulsar la barra espaciadora o tocar la ficha.</div>
+  </div>
+
+<script>
+(() => {
+  const dice = document.getElementById('dice');
+  const result = document.getElementById('result');
+  const emoji = document.getElementById('emoji');
+  const rollBtn = document.getElementById('rollBtn');
+  const soundBtn = document.getElementById('soundBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const faces = [
+    { name: 'Amarillo', cls: 'c-amarillo', emoji: '🟡' },
+    { name: 'Rojo',     cls: 'c-rojo',     emoji: '🔴' },
+    { name: 'Verde',    cls: 'c-verde',    emoji: '🟢' },
+    { name: 'Morado',   cls: 'c-morado',   emoji: '🟣' }
+  ];
+
+  let soundOn = true;
+  let lastIndex = -1;
+
+  // tiny click sound
+  const audio = (() => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = 880;
+      g.gain.value = 0;
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      return { ctx,o,g };
+    } catch(e){ return null; }
+  })();
+
+  function playBeep() {
+    if (!soundOn || !audio) return;
+    const { ctx,o,g } = audio;
+    g.gain.cancelScheduledValues(0);
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    // change freq slightly
+    o.frequency.setValueAtTime(700 + Math.random()*500, ctx.currentTime);
+  }
+
+  function vibrate() {
+    if (navigator.vibrate) navigator.vibrate(40);
+  }
+
+  function pickRandom() {
+    // avoid same twice in a row
+    let n;
+    do { n = Math.floor(Math.random()*faces.length); } while (n === lastIndex && faces.length>1);
+    lastIndex = n;
+    return faces[n];
+  }
+
+  function roll() {
+    // animation
+    dice.style.animation = 'roll 700ms cubic-bezier(.2,.9,.3,1)';
+    dice.style.boxShadow = '0 18px 40px rgba(2,6,23,0.8), inset 0 -10px 30px rgba(255,255,255,0.03)';
+    setTimeout(()=> {
+      dice.style.animation = '';
+      const f = pickRandom();
+      // set color
+      dice.className = 'dice ' + f.cls;
+      emoji.textContent = f.emoji;
+      result.textContent = f.name;
+      result.setAttribute('aria-live','polite');
+      if (soundOn) playBeep();
+      vibrate();
+      // small pulse
+      dice.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(1)'}], { duration:250, easing:'ease-out' });
+    }, 650);
+  }
+
+  // controls
+  dice.addEventListener('click', roll);
+  dice.addEventListener('keydown', (e)=>{ if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); roll(); } });
+  rollBtn.addEventListener('click', roll);
+  soundBtn.addEventListener('click', ()=> {
+    soundOn = !soundOn;
+    soundBtn.textContent = (soundOn ? '🔊 Sonido: On' : '🔈 Sonido: Off');
+  });
+  resetBtn.addEventListener('click', ()=> {
+    dice.className = 'dice c-amarillo';
+    emoji.textContent = '🎲';
+    result.textContent = 'Toca el dado para lanzar';
+    lastIndex = -1;
+  });
+
+  // quick keyboard support
+  document.addEventListener('keydown', (e)=> {
+    if (e.key === ' ') { e.preventDefault(); roll(); }
+    if (e.key === 'r') { resetBtn.click(); }
+  });
+
+  // accessibility: focus visible on tap
+  dice.addEventListener('touchstart', ()=> dice.focus());
+
+  // share / add to home hint (optional)
+  // auto-install hint for Android PWA not included; user can add with browser menu
+
+})();
+</script>
+</body>
+</html>
