@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Atrapa al Elfo</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="estilo.css">
+  <link rel="manifest" href="manifiesto.json">
 </head>
 <body>
   <div class="container">
@@ -28,9 +28,11 @@
   </div>
 
   <script src="app.js"></script>
+
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(()=>{});
+      navigator.serviceWorker.register('servicio-worker.js')
+      .catch(()=>{});
     }
   </script>
 </body>
