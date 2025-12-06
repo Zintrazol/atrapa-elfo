@@ -1,0 +1,20 @@
+{
+  "name": "Atrapa al Elfo",
+  "short_name": "Elfo",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#ff0000",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/BedbYbY.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.imgur.com/BedbYbY.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
